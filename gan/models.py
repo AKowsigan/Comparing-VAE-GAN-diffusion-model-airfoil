@@ -5,7 +5,7 @@ if '__file__' in globals():
 import torch.nn as nn
 import torch
 
-coord_shape = (1, 496) # n = 248 ? why x2 ?
+coord_shape = (1, 496) # n = 248x2 for x and y 
 
 class Generator(nn.Module):
     def __init__(self, latent_dim):
