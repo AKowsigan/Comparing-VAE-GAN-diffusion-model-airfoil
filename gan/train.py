@@ -14,8 +14,8 @@ import torch.nn.functional as F
 import torch
 import torch.autograd as autograd
 import statistics
-from normal.models import Generator, Discriminator
-from util import save_loss, to_cpu, save_coords, to_cuda
+from gan.models import Generator, Discriminator
+from gan.utils import save_loss, to_cpu, save_coords, to_cuda
 
 
 parser = argparse.ArgumentParser()
@@ -37,8 +37,8 @@ cuda = True if torch.cuda.is_available() else False
 # Loss weight for gradient penalty
 done_epoch = 0 # 変えること
 if done_epoch>0:
-    G_PATH = "normal/results/generator_params_{0}".format(done_epoch)
-    D_PATH = "normal/results/discriminator_params_{0}".format(done_epoch)
+    G_PATH = "gan/results/generator_params_{0}".format(done_epoch)
+    D_PATH = "gan/results/discriminator_params_{0}".format(done_epoch)
     generator = Generator(opt.latent_dim)
     generator.load_state_dict(torch.load(G_PATH, map_location=torch.device('cpu')))
     generator.eval()
@@ -144,11 +144,11 @@ for epoch in range(opt.n_epochs):
     D_losses.append(d_loss.item())
     G_losses.append(g_loss.item())
     if epoch % 5000 == 0:
-            torch.save(generator.state_dict(), "normal/results/generator_params_{0}".format(epoch))
-            torch.save(discriminator.state_dict(), "normal/results/discriminator_params_{0}".format(epoch))
+            torch.save(generator.state_dict(), "gan/results/generator_params_{0}".format(epoch))
+            torch.save(discriminator.state_dict(), "gan/results/discriminator_params_{0}".format(epoch))
 
-torch.save(generator.state_dict(), "normal/results/generator_params_{0}".format(opt.n_epochs+done_epoch))
-torch.save(discriminator.state_dict(), "normal/results/discriminator_params_{0}".format(opt.n_epochs+done_epoch)) 
+torch.save(generator.state_dict(), "gan/results/generator_params_{0}".format(opt.n_epochs+done_epoch))
+torch.save(discriminator.state_dict(), "gan/results/discriminator_params_{0}".format(opt.n_epochs+done_epoch)) 
 end = time.time()
 print((end-start)/60)
-np.savez("normal/results/loss.npz", np.array(D_losses), np.array(G_losses))
+np.savez("gan/results/loss.npz", np.array(D_losses), np.array(G_losses))

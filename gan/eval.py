@@ -11,7 +11,7 @@ import torch.nn as nn
 from normal.models import Generator
 import matplotlib.pyplot as plt
 from calc_cl import get_cl, get_cls
-from util import to_cpu, to_cuda, save_coords_by_cl 
+from gan.utils import to_cpu, to_cuda, save_coords_by_cl 
 
 cuda = True if torch.cuda.is_available() else False
 FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
