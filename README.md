@@ -8,4 +8,8 @@
 
 the lift coefficient was calculated for all the four-digit airfoils, and those whose CL could not be calculated or CL < 0 or CL > 2.0 were eliminated. After elimination, the total number of airfoils was 3709.
 
+##  GAN
+
 ```python -m gan.train```
+
+```python -m gan.eval```
