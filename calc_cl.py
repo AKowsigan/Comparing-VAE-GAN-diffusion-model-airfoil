@@ -3,7 +3,7 @@ from xfoil.model import Airfoil
 import numpy as np
 import time
 
-"""xfoilが入っていないと使えない"""
+"""Cannot be used without xfoil"""
 def get_cl(coord, xf=None, angle=5):
   if xf is None:
     xf = XFoil()

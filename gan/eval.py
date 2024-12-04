@@ -7,6 +7,7 @@ import numpy as np
 from torch.autograd import Variable
 import torch
 import torch.nn as nn
+from torch.nn.functional import mse_loss
 
 from gan.models import Generator
 import matplotlib.pyplot as plt
@@ -40,7 +41,7 @@ class Eval:
     return gen_coords
 
   def create_successive_coords(self):
-    """0.01から1.50まで151個のC_L^cと翼形状を生成"""
+    """Generate 151 airfoil shapes with C_L^c ranging from 0.01 to 1.50"""
     cl_r = []
     cl_c = []
     gen_coords = []
@@ -150,6 +151,25 @@ class Eval:
           data_idx = didx
           generate_idx = i
     return max_dist, data_idx, generate_idx
+  
+  def calc_mse(self):
+        """
+        Calcule le MSE entre les labels spécifiés et les labels recalculés.
+        """
+        coords_npz = np.load("gan/results/successive_label.npz")
+        specified_labels = coords_npz[coords_npz.files[0]]  # Labels spécifiés
+        recalculated_labels = coords_npz[coords_npz.files[1]]  # Labels recalculés
+
+        # Filtrer les labels valides (éviter -1)
+        valid_indices = recalculated_labels != -1
+        specified_labels = specified_labels[valid_indices]
+        recalculated_labels = recalculated_labels[valid_indices]
+
+        # Calcul du MSE
+        mse = np.mean((specified_labels - recalculated_labels) ** 2)
+
+        print(f"MSE entre les labels spécifiés et recalculés : {mse:.6f}")
+        return mse
 
 if __name__ == "__main__":
   coords_npz = np.load("dataset/standardized_coords.npz")
@@ -161,6 +181,9 @@ if __name__ == "__main__":
   coords = coords.reshape(coords.shape[0], -1)
   mu = evl.euclid_dist(coords)
   print(mu)
+  evl.create_successive_coords()
+  # mse = evl.calc_mse()
+  # print(mse)
   # clr = get_cls(coords)
   # max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
   # print(max_dist)

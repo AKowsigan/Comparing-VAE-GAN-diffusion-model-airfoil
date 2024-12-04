@@ -4,6 +4,5 @@ matplotlib
 numpy
 scipy
 deprecated
-xfoil
 dotmap
 pandas
