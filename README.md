@@ -15,3 +15,9 @@ the lift coefficient was calculated for all the four-digit airfoils, and those w
 ```python -m gan.eval```
 
 ```python -m gan.plot```
+
+##  Conditional wGAN-GP
+
+```python -m wgan_gp.train```
+
+```python -m wgan_gp.eval```
