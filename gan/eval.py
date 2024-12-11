@@ -181,16 +181,16 @@ if __name__ == "__main__":
   coords = coords.reshape(coords.shape[0], -1)
   mu = evl.euclid_dist(coords)
   print(mu)
-  evl.create_successive_coords()
+  # evl.create_successive_coords()
   # mse = evl.calc_mse()
   # print(mse)
-  # clr = get_cls(coords)
-  # max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
-  # print(max_dist)
-  # d_coord = evl.rev_standardize(evl.coords['data'][d_idx])
-  # d_cl = perfs[d_idx]
-  # g_coord = coords[g_idx]
-  # g_cl = clr[g_idx]
-  # print(cl_c, d_cl, g_cl)
-  # cls = np.array([cl_c, d_cl, g_cl])
-  # np.savez("dist_{0}".format(cl_c), d_coord, g_coord, cls, max_dist)
+  clr = get_cls(coords)
+  max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
+  print(max_dist)
+  d_coord = evl.rev_standardize(evl.coords['data'][d_idx])
+  d_cl = perfs[d_idx]
+  g_coord = coords[g_idx]
+  g_cl = clr[g_idx]
+  print(cl_c, d_cl, g_cl)
+  cls = np.array([cl_c, d_cl, g_cl])
+  np.savez("dist_{0}".format(cl_c), d_coord, g_coord, cls, max_dist)
