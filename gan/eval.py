@@ -179,18 +179,36 @@ if __name__ == "__main__":
   cl_c = 0.684
   coords = evl.create_coords_by_cl(cl_c)
   coords = coords.reshape(coords.shape[0], -1)
+  # # print coords
+  # print( "coords shape : ", coords.shape)
+  # print( "coords : ", coords)
   mu = evl.euclid_dist(coords)
   print(mu)
+
+  # Affichage du premier profil généré (ou plusieurs si besoin)
+  plt.figure(figsize=(8, 4))
+  for i, coord in enumerate(coords[:1]):  # Changer [:1] pour afficher plus de profils
+      x, y = coord.reshape(2, -1)
+      plt.plot(x, y, label=f"Profil {i+1}")
+
+  plt.title(f"Profil généré pour CL = {cl_c}")
+  plt.xlabel("x-coordinate")
+  plt.ylabel("y-coordinate")
+  plt.axis('equal')  # Garde les proportions
+  plt.legend()
+  plt.grid()
+  plt.show()
   # evl.create_successive_coords()
+  # evl.successive()
   # mse = evl.calc_mse()
   # print(mse)
-  clr = get_cls(coords)
-  max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
-  print(max_dist)
-  d_coord = evl.rev_standardize(evl.coords['data'][d_idx])
-  d_cl = perfs[d_idx]
-  g_coord = coords[g_idx]
-  g_cl = clr[g_idx]
-  print(cl_c, d_cl, g_cl)
-  cls = np.array([cl_c, d_cl, g_cl])
-  np.savez("dist_{0}".format(cl_c), d_coord, g_coord, cls, max_dist)
+  # clr = get_cls(coords)
+  # max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
+  # print(max_dist)
+  # d_coord = evl.rev_standardize(evl.coords['data'][d_idx])
+  # d_cl = perfs[d_idx]
+  # g_coord = coords[g_idx]
+  # g_cl = clr[g_idx]
+  # print(cl_c, d_cl, g_cl)
+  # cls = np.array([cl_c, d_cl, g_cl])
+  # np.savez("dist_{0}".format(cl_c), d_coord, g_coord, cls, max_dist)
