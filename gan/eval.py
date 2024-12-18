@@ -172,32 +172,46 @@ class Eval:
         return mse
 
 if __name__ == "__main__":
+  import matplotlib.pyplot as plt  # Ensure Matplotlib is imported
+
   coords_npz = np.load("dataset/standardized_coords.npz")
   perfs = np.load("dataset/perfs.npy")
   G_PATH = "gan/results/generator_params_45000"
   evl = Eval(G_PATH, coords_npz)
-  cl_c = 0.684
-  coords = evl.create_coords_by_cl(cl_c)
+  cl_c = 0.684  # Target lift coefficient
+  # cl_c = 0.1
+  # cl_c = 1.4
+
+  # Generate 12 profiles for the given CL
+  data_num = 12
+  coords = evl.create_coords_by_cl(cl_c, data_num=data_num)
   coords = coords.reshape(coords.shape[0], -1)
-  # # print coords
-  # print( "coords shape : ", coords.shape)
-  # print( "coords : ", coords)
+
+  # Calculate the average Euclidean distance
   mu = evl.euclid_dist(coords)
-  print(mu)
+  print(f"Average distance: {mu}")
 
-  # Affichage du premier profil généré (ou plusieurs si besoin)
-  plt.figure(figsize=(8, 4))
-  for i, coord in enumerate(coords[:1]):  # Changer [:1] pour afficher plus de profils
-      x, y = coord.reshape(2, -1)
-      plt.plot(x, y, label=f"Profil {i+1}")
+  # Display the 12 profiles in a 4x3 grid
+  fig, axes = plt.subplots(4, 3, figsize=(12, 8))  # Create a 4x3 grid
+  fig.suptitle(f"cGAN Generated profiles for CL = {cl_c}", fontsize=16)
 
-  plt.title(f"Profil généré pour CL = {cl_c}")
-  plt.xlabel("x-coordinate")
-  plt.ylabel("y-coordinate")
-  plt.axis('equal')  # Garde les proportions
-  plt.legend()
-  plt.grid()
+  for i, coord in enumerate(coords):
+    ax = axes[i // 3, i % 3]  # Select the axis in the grid
+    x, y = coord.reshape(2, -1)
+    ax.plot(x, y)
+    ax.set_title(f"Profile {i+1}", fontsize=10)
+    ax.axis('equal')  # Equal proportions for each axis
+    ax.grid(True)
+
+  # Remove unused subplots (if there are fewer than 12)
+  for j in range(data_num, 12):
+    fig.delaxes(axes[j // 3, j % 3])
+
+  plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust margins around the main title
   plt.show()
+  # Save the generated profiles name : generated_profiles_cl.png
+  fig.savefig(f"gan/results/generated_profiles_{cl_c}.png")
+
   # evl.create_successive_coords()
   # evl.successive()
   # mse = evl.calc_mse()

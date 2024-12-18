@@ -131,15 +131,45 @@ class Eval:
     return max_dist, data_idx, generate_idx
     
 if __name__ == "__main__":
-  coords_npz = np.load("dataset/standardized_upsampling_coords.npz")
-  perfs = np.load("dataset/upsampling_perfs.npy")
-  G_PATH = "wgan_gp/results/generator_params_100000"
-  evl = Eval(G_PATH, coords_npz)
-  cl_c = 0.789
-  coords = evl.create_coords_by_cl(cl_c)
-  coords = coords.reshape(coords.shape[0], -1)
-  mu = evl.euclid_dist(coords)
-  print(mu)
+    import matplotlib.pyplot as plt  # Ensure Matplotlib is imported
+
+    # Load data
+    coords_npz = np.load("dataset/standardized_upsampling_coords.npz")
+    perfs = np.load("dataset/upsampling_perfs.npy")
+    G_PATH = "wgan_gp/results/generator_params_100000"
+
+    # Initialize the evaluator
+    evl = Eval(G_PATH, coords_npz)
+    cl_c = 0.789  # Target lift coefficient (CL)
+
+    # Generate 12 airfoil shapes for the given CL
+    data_num = 12
+    coords = evl.create_coords_by_cl(cl_c, data_num=data_num)
+    coords = coords.reshape(coords.shape[0], -1)
+
+    # Compute the average Euclidean distance
+    mu = evl.euclid_dist(coords)
+    print(f"Average Euclidean distance: {mu}")
+
+    # Plot the 12 airfoil shapes in a 4x3 grid
+    fig, axes = plt.subplots(4, 3, figsize=(12, 8))  # Create a 4x3 grid
+    fig.suptitle(f"Generated Airfoil Shapes for CL = {cl_c}", fontsize=16)
+
+    for i, coord in enumerate(coords):
+        ax = axes[i // 3, i % 3]  # Select the axis in the grid
+        x, y = coord.reshape(2, -1)
+        ax.plot(x, y)
+        ax.set_title(f"Shape {i+1}", fontsize=10)
+        ax.axis('equal')  # Maintain equal aspect ratio
+        ax.grid(True)
+
+    # Remove unused subplots (if fewer than 12 shapes are generated)
+    for j in range(data_num, 12):
+        fig.delaxes(axes[j // 3, j % 3])
+
+    plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust margins around the main title
+    plt.show()
+
   # clr = get_cls(coords)
   # max_dist, d_idx, g_idx = evl.calc_dist_from_dataset(coords, clr)
   # print(max_dist)
