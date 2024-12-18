@@ -15,7 +15,7 @@ import torch
 import torch.autograd as autograd
 import statistics
 from wgan_gp.models import Generator, Discriminator
-from util import save_loss, to_cpu, save_coords, to_cuda
+from wgan_gp.utils import save_loss, to_cpu, save_coords, to_cuda
 
 
 parser = argparse.ArgumentParser()
@@ -38,7 +38,7 @@ coord_shape = (opt.channels, opt.coord_size)
 cuda = True if torch.cuda.is_available() else False
 lambda_gp = 10
 # Loss weight for gradient penalty
-done_epoch = 50000
+done_epoch = 0
 if done_epoch>0:
     G_PATH = "wgan_gp/results/generator_params_{0}".format(done_epoch)
     D_PATH = "wgan_gp/results/discriminator_params_{0}".format(done_epoch)
@@ -58,8 +58,8 @@ if cuda:
     discriminator.cuda()
 
 # Configure data loader
-perfs_npz = np.load("dataset/standardized_upsampling_perfs.npz")
-coords_npz = np.load("dataset/standardized_upsampling_coords.npz")
+perfs_npz = np.load("dataset/standardized_perfs.npz")
+coords_npz = np.load("dataset/standardized_coords.npz")
 coords = coords_npz[coords_npz.files[0]]
 coord_mean = coords_npz[coords_npz.files[1]]
 coord_std = coords_npz[coords_npz.files[2]]
