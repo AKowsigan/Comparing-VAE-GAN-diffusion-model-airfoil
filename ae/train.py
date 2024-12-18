@@ -12,7 +12,7 @@ from torch.autograd import Variable
 import torch.nn as nn
 import torch
 from ae.models import AutoEncoder
-from ae.utils import save_loss, to_cuda
+from util import save_loss, to_cuda
 
 # Parse arguments
 parser = argparse.ArgumentParser()
