@@ -1,5 +1,5 @@
-from xfoil import XFoil
-from xfoil.model import Airfoil
+# from xfoil import xf as XFoil
+# from xfoil.model import Airfoil
 import numpy as np
 import time
 
