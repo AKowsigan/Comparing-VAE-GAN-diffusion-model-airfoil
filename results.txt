@@ -1,0 +1,3 @@
+Results for airfoil 'wgan_gp/results/xfoil/airfoil_12.dat' at Re=3000000
+ AoA (deg)	CL		CD
+  5.00		None		None

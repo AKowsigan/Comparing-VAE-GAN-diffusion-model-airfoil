@@ -145,77 +145,7 @@ def save_airfoil_file(coords, filename):
         f.write("Generated Airfoil\n")
         for x, y in coords.T:
             f.write(f"{x:.6f} {y:.6f}\n")
-    print(f"Fichier généré : {filename}")
-
-import subprocess
-import os
-
-def calculate_cl_with_xfoil(dat_file, aoa=5.0, reynolds=3e6, xfoil_exec="./xfoil"):
-    import os
-    import subprocess
-
-    if not os.path.exists(dat_file):
-        print(f"Erreur : le fichier {dat_file} n'existe pas.")
-        return None
-
-    # Fichier de sortie
-    output_file = "xfoil_output.txt"
-
-    # On envoie un script complet à XFOIL
-    xfoil_input = f"""
-LOAD {dat_file}
-PANE
-OPER
-VISC 3e6
-ITER 200
-ALFA 5
-PACC
-{output_file}
-
-QUIT
-"""
-
-    try:
-        process = subprocess.Popen(
-            [xfoil_exec],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        stdout, stderr = process.communicate(input=xfoil_input.encode())
-        if process.returncode != 0:
-            print(f"XFOIL a renvoyé un code de sortie = {process.returncode}")
-            print(stderr.decode(errors='ignore'))
-            return None
-
-        # On parse xfoil_output.txt pour trouver la ligne contenant "alpha, CL, ..."
-        cl_value = None
-        if os.path.exists(output_file):
-            with open(output_file, "r") as f:
-                for line in f:
-                    if "alpha" in line.lower():
-                        # C'est la ligne d'entête, on continue
-                        continue
-                    if line.strip() and not line.startswith("-----"):
-                        # Normalement, c'est la ligne de résultats
-                        # Format: alpha CL CD CDp CM ...
-                        parts = line.split()
-                        if len(parts) >= 2:
-                            try:
-                                # alpha = float(parts[0])
-                                cl_value = float(parts[1])
-                            except:
-                                pass
-                        break
-            # on peut supprimer le fichier après lecture
-            os.remove(output_file)
-
-        return cl_value
-
-    except Exception as e:
-        print(f"Erreur d'exécution XFOIL : {e}")
-        return None
-
+    # print(f"Fichier généré : {filename}")
 
 if __name__ == "__main__":
   # Load data
@@ -225,7 +155,7 @@ if __name__ == "__main__":
 
   # Initialize the evaluator
   evl = Eval(G_PATH, coords_npz)
-  cl_c = 1.0  # Target lift coefficient (CL)
+  cl_c = 0.5  # Target lift coefficient (CL)
 
   # Generate 12 airfoil shapes for the given CL
   data_num = 12
@@ -240,36 +170,6 @@ if __name__ == "__main__":
   for i, coord in enumerate(coords):
       filename = f"wgan_gp/results/xfoil/airfoil_{i+1}.dat"
       save_airfoil_file(coord.reshape(2, -1), filename)
-
-# Dossier contenant les fichiers .dat
-  results_dir = "wgan_gp/results/xfoil/"
-  
-  # Génère une liste des fichiers .dat
-  dat_files = [f for f in os.listdir(results_dir) if f.endswith(".dat")]
-  
-  # Angle d'attaque et Reynolds
-  aoa = 5.0  # Angle d'attaque en degrés
-  reynolds = 1e6  # Nombre de Reynolds
-
-  # Stocke les résultats
-  cl_results = []
-  # calculate_cl_with_xfoil("wgan_gp/results/xfoil/airfoil_1.dat", aoa=aoa, reynolds=reynolds)
-
-  for dat_file in dat_files:
-      dat_path = os.path.join(results_dir, dat_file)
-      cl = calculate_cl_with_xfoil(dat_path, aoa=aoa, reynolds=reynolds)
-      if cl is not None:
-          cl_results.append((dat_file, cl))
-          print(f"{dat_file}: CL = {cl}")
-      else:
-          cl_results.append((dat_file, cl))
-          print(f"{dat_file}: CL = {cl}")
-          print(f"Échec du calcul de CL pour {dat_file}")
-
-  # Enregistrer les résultats dans un fichier
-  with open(os.path.join(results_dir, "cl_results.txt"), "w") as f:
-      for dat_file, cl in cl_results:
-          f.write(f"{dat_file}: CL = {cl}\n")
 
   # Plot the 12 airfoil shapes in a 4x3 grid
   fig, axes = plt.subplots(4, 3, figsize=(12, 8))  # Create a 4x3 grid
