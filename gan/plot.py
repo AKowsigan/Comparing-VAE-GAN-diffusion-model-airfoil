@@ -1,19 +1,25 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Charger les pertes depuis le fichier loss.npz
+# Load the losses from the loss.npz file
 data = np.load("gan/results/loss.npz")
-D_losses = data['arr_0']  # Les pertes du discriminant
-G_losses = data['arr_1']  # Les pertes du générateur
+D_losses = data['arr_0']  # Discriminator losses
+G_losses = data['arr_1']  # Generator losses
 
-# Créer le graphique des pertes
+# Create the loss plot
 plt.figure(figsize=(10, 5))
-plt.title("Évolution des pertes pendant l'entraînement")
-plt.plot(D_losses, label="Pertes du Discriminant (D)")
-plt.plot(G_losses, label="Pertes du Générateur (G)")
-plt.xlabel("Épochs")
-plt.ylabel("Pertes")
+plt.title("Loss Evolution During Training")
+plt.plot(D_losses, label="Discriminator Losses (D)")
+plt.plot(G_losses, label="Generator Losses (G)")
+plt.xlabel("Epochs")
+plt.ylabel("Losses")
 plt.legend()
 plt.grid()
+
+# Save the plot before displaying it
+output_file = "gan/images/loss.png"
+plt.savefig(output_file, bbox_inches="tight")
+print(f"Plot saved to: {output_file}")
+
+# Display the plot
 plt.show()
-plt.savefig("gan/results/loss.png")

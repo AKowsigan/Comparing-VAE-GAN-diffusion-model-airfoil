@@ -172,45 +172,52 @@ class Eval:
         return mse
 
 if __name__ == "__main__":
-  import matplotlib.pyplot as plt  # Ensure Matplotlib is imported
 
-  coords_npz = np.load("dataset/standardized_coords.npz")
-  perfs = np.load("dataset/perfs.npy")
-  G_PATH = "gan/results/generator_params_45000"
-  evl = Eval(G_PATH, coords_npz)
-  cl_c = 0.684  # Target lift coefficient
-  # cl_c = 0.1
-  # cl_c = 1.4
+    coords_npz = np.load("dataset/standardized_coords.npz")
+    perfs = np.load("dataset/perfs.npy")
+    G_PATH = "gan/results/generator_params_45000"
+    evl = Eval(G_PATH, coords_npz)
 
-  # Generate 12 profiles for the given CL
-  data_num = 12
-  coords = evl.create_coords_by_cl(cl_c, data_num=data_num)
-  coords = coords.reshape(coords.shape[0], -1)
+    # List of target lift coefficients
+    cl_values = [0.5, 1.0, 1.2]
 
-  # Calculate the average Euclidean distance
-  mu = evl.euclid_dist(coords)
-  print(f"Average distance: {mu}")
+    # Generate profiles for each CL value
+    for cl_c in cl_values:
+        print(f"Generating profiles for CL = {cl_c}")
+        
+        # Generate 12 profiles for the given CL
+        data_num = 12
+        coords = evl.create_coords_by_cl(cl_c, data_num=data_num)
+        coords = coords.reshape(coords.shape[0], -1)
 
-  # Display the 12 profiles in a 4x3 grid
-  fig, axes = plt.subplots(4, 3, figsize=(12, 8))  # Create a 4x3 grid
-  fig.suptitle(f"cGAN Generated profiles for CL = {cl_c}", fontsize=16)
+        # Calculate the average Euclidean distance
+        mu = evl.euclid_dist(coords)
+        print(f"Average distance for CL = {cl_c}: {mu}")
 
-  for i, coord in enumerate(coords):
-    ax = axes[i // 3, i % 3]  # Select the axis in the grid
-    x, y = coord.reshape(2, -1)
-    ax.plot(x, y)
-    ax.set_title(f"Profile {i+1}", fontsize=10)
-    ax.axis('equal')  # Equal proportions for each axis
-    ax.grid(True)
+        # Display the 12 profiles in a 4x3 grid
+        fig, axes = plt.subplots(4, 3, figsize=(12, 8))  # Create a 4x3 grid
+        fig.suptitle(f"cGAN Generated profiles for CL = {cl_c}", fontsize=16)
 
-  # Remove unused subplots (if there are fewer than 12)
-  for j in range(data_num, 12):
-    fig.delaxes(axes[j // 3, j % 3])
+        for i, coord in enumerate(coords):
+            ax = axes[i // 3, i % 3]  # Select the axis in the grid
+            x, y = coord.reshape(2, -1)
+            ax.plot(x, y)
+            ax.set_title(f"Profile {i+1}", fontsize=10)
+            ax.axis('equal')  # Equal proportions for each axis
+            ax.grid(True)
 
-  plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust margins around the main title
-  plt.show()
-  # Save the generated profiles name : generated_profiles_cl.png
-  fig.savefig(f"gan/results/generated_profiles_{cl_c}.png")
+        # Remove unused subplots (if there are fewer than 12)
+        for j in range(data_num, 12):
+            fig.delaxes(axes[j // 3, j % 3])
+
+        plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust margins around the main title
+
+        # Save the generated profiles to a file
+        output_file = f"gan/results/generated_profiles_{cl_c}.png"
+        plt.savefig(output_file)
+        print(f"Saved generated profiles to {output_file}")
+        # plt.show()
+
 
   # evl.create_successive_coords()
   # evl.successive()
