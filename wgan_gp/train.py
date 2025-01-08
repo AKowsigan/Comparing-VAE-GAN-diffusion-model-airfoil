@@ -90,10 +90,10 @@ def sample_image(epoch=None, data_num=12):
     gen_coords = to_cpu(generator(z, labels)).detach().numpy()
     labels = to_cpu(labels).detach().numpy()
     if epoch is not None:
-        save_coords(gen_coords*coord_std+coord_mean, labels, "wgan_gp/coords/epoch_{0}".format(str(epoch).zfill(3)))
+        save_coords(gen_coords*coord_std+coord_mean, labels, "wgan_gp/results/epoch_{0}".format(str(epoch).zfill(3)))
     else:
         np.savez("wgan_gp/results/final", labels, gen_coords*coord_std+coord_mean)
-        save_coords(gen_coords*coord_std+coord_mean, labels, "wgan_gp/coords/final.png")
+        save_coords(gen_coords*coord_std+coord_mean, labels, "wgan_gp/results/final.png")
 
 def compute_gradient_penalty(D, real_samples, fake_samples, labels):
     """Calculates the gradient penalty loss for WGAN GP"""
