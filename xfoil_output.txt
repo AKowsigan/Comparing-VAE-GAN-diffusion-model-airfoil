@@ -1,7 +1,7 @@
   
        XFOIL         Version 6.99
   
- Calculated polar for: Generated Airfoil                               
+ Calculated polar for: NACA 2412                                       
   
  1 1 Reynolds number fixed          Mach number fixed         
   
