@@ -28,14 +28,13 @@ opt = parser.parse_args()
 coord_shape = (1, opt.coord_size)
 cuda = True if torch.cuda.is_available() else False
 
-# Load dataset
+# Configure data loader
+perfs_npz = np.load("dataset/standardized_perfs.npz")
 coords_npz = np.load("dataset/standardized_coords.npz")
-coords = coords_npz[coords_npz.files[0]].astype(np.float32)
+coords = coords_npz[coords_npz.files[0]]
 coord_mean = coords_npz[coords_npz.files[1]]
 coord_std = coords_npz[coords_npz.files[2]]
-
-# Normalize data
-coords = (coords - coord_mean) / coord_std
+perfs = perfs_npz[perfs_npz.files[0]]
 
 dataset = TensorDataset(torch.tensor(coords))
 dataloader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True)
