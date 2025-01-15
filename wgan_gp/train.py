@@ -19,7 +19,7 @@ from wgan_gp.utils import save_loss, to_cpu, save_coords, to_cuda
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--n_epochs", type=int, default=10000, help="number of epochs of training")
+parser.add_argument("--n_epochs", type=int, default=50000, help="number of epochs of training")
 parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
 parser.add_argument("--lr", type=float, default=0.0001, help="adam: learning rate") # 1e-4
 parser.add_argument("--b1", type=float, default=0, help="adam: decay of first order momentum of gradient") # 0.0
