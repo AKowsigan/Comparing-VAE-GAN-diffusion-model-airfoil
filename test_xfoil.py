@@ -4,16 +4,16 @@ from xfoil_utils import polar
 
 def main():
 
-    # afile = "naca2412.dat"
-    afile ="wgan_gp/results/xfoil/airfoil_10.dat"
+    afile = "naca2412.dat"
+    # afile ="wgan_gp/results/xfoil/airfoil_7.dat"
     
 
     # Set Reynolds number
     re = 3_000_000  
 
     # Define angles of attack to evaluate
-    # angles = [0, 2, 4, 6, 8, 10] 
-    angles = [5] 
+    angles = [0, 2, 4, 6, 8, 10] 
+    # angles = [5] 
 
     # Call the 'polar' function, which internally calls 'calc_polar' + 'read_polar' + 'delete_polar'
     # We'll pass the angles in via the 'alfaseq' argument.
@@ -25,7 +25,7 @@ def main():
         re=re,
         alfaseq=angles,
         refine=False,
-        max_iter=50
+        max_iter=110
     )
 
     # The 'results' dictionary contains arrays: 'a', 'cl', 'cd', 'cdp', 'cm', 'xtr_top', 'xtr_bottom'.
@@ -35,7 +35,7 @@ def main():
         print(f" alpha={alpha_val:>5.2f}  CL={cl_val:>7.4f}  CD={cd_val:>7.5f}")
 
     # Optionally, you could do something like plotting:
-    import matplotlib.pyplot as plt
+    # import matplotlib.pyplot as plt
     # plt.figure()
     # plt.plot(results['a'], results['cl'], 'o-')
     # plt.xlabel('Angle of attack (deg)')
