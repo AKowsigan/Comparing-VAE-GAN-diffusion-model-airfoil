@@ -27,3 +27,9 @@ the lift coefficient was calculated for all the four-digit airfoils, and those w
 ```python -m ae.train```
 
 ```python -m ae.eval```
+
+##  Conditional VAE
+
+```python -m vae.train```
+
+```python -m vae.eval```
