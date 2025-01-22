@@ -2,10 +2,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-coord_shape = (1, 496)
-
 class VAE(nn.Module):
-    def __init__(self, input_dim, latent_dim):
+    def __init__(self, input_dim=496, latent_dim=16):
         super(VAE, self).__init__()
         self.latent_dim = latent_dim
 
@@ -14,7 +12,7 @@ class VAE(nn.Module):
             nn.Linear(input_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 128),
-            nn.ReLU()
+            nn.ReLU(),
         )
         self.mu_layer = nn.Linear(128, latent_dim)
         self.logvar_layer = nn.Linear(128, latent_dim)
@@ -26,7 +24,7 @@ class VAE(nn.Module):
             nn.Linear(128, 256),
             nn.ReLU(),
             nn.Linear(256, input_dim),
-            nn.Tanh()
+            nn.Tanh(),
         )
 
     def encode(self, x):

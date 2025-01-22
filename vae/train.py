@@ -1,72 +1,94 @@
-import os
-import torch
-import torch.optim as optim
-import torch.nn.functional as F
-from torch.utils.data import DataLoader, TensorDataset
+if '__file__' in globals():
+    import os, sys
+    sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
+
+import argparse
 import numpy as np
+import matplotlib.pyplot as plt
+import time
+from torch.utils.data import DataLoader, TensorDataset
+from torch.autograd import Variable
+
+import torch.nn as nn
+import torch
 from vae.model import VAE
+from util import save_loss, to_cuda
 
-# Create a directory to save results
-os.makedirs("vae/results", exist_ok=True)
+# Parse arguments
+parser = argparse.ArgumentParser()
+parser.add_argument("--n_epochs", type=int, default=10000, help="number of epochs of training")
+parser.add_argument("--batch_size", type=int, default=64, help="size of the batches")
+parser.add_argument("--lr", type=float, default=0.0002, help="adam: learning rate")
+parser.add_argument("--b1", type=float, default=0.5, help="adam: decay of first order momentum of gradient")
+parser.add_argument("--b2", type=float, default=0.999, help="adam: decay of second order momentum of gradient")
+parser.add_argument("--coord_size", type=int, default=496, help="size of input coordinate dimension")
+parser.add_argument("--latent_dim", type=int, default=16, help="dimensionality of the latent space")
+opt = parser.parse_args()
 
-# Load the dataset
+coord_shape = (1, opt.coord_size)
+cuda = True if torch.cuda.is_available() else False
+
+# Load dataset
+perfs_npz = np.load("dataset/standardized_perfs.npz")
 coords_npz = np.load("dataset/standardized_coords.npz")
 coords = coords_npz[coords_npz.files[0]]
+coord_mean = coords_npz[coords_npz.files[1]]
+coord_std = coords_npz[coords_npz.files[2]]
 
-# Flatten the data for the VAE input
-input_dim = coords.shape[1] * coords.shape[2]
-coords = coords.reshape(coords.shape[0], -1)
-dataset = TensorDataset(torch.tensor(coords, dtype=torch.float32))
-dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
+dataset = TensorDataset(torch.tensor(coords))
+dataloader = DataLoader(dataset, batch_size=opt.batch_size, shuffle=True)
 
-# Initialize the VAE model
-latent_dim = 3
-vae = VAE(input_dim=input_dim, latent_dim=latent_dim)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-vae.to(device)
+# Initialize VAE
+vae = VAE(input_dim=opt.coord_size, latent_dim=opt.latent_dim)
+if cuda:
+    print("Using GPU")
+    vae.cuda()
 
 # Optimizer
-optimizer = optim.Adam(vae.parameters(), lr=1e-3)
+optimizer = torch.optim.Adam(vae.parameters(), lr=opt.lr, betas=(opt.b1, opt.b2))
 
-# Loss function for VAE
+FloatTensor = torch.cuda.FloatTensor if cuda else torch.FloatTensor
+
+# Loss function
 def vae_loss(recon_x, x, mu, logvar):
-    # Reconstruction loss (mean squared error)
-    recon_loss = F.mse_loss(recon_x, x, reduction='sum')
-    # Kullback-Leibler divergence loss
-    kld_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
-    return recon_loss + kld_loss
-
-# Training parameters
-epochs = 50000
-save_interval = 5000
-vae.train()
+    BCE = nn.MSELoss()(recon_x, x)
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    return BCE + KLD
 
 # Training loop
-for epoch in range(epochs):
-    total_loss = 0
-    for batch in dataloader:
-        x = batch[0].to(device)
+start = time.time()
+losses = []
+for epoch in range(opt.n_epochs):
+    epoch_loss = 0
+    for i, (coords,) in enumerate(dataloader):
+        real_coords = Variable(coords.type(FloatTensor))
+
         optimizer.zero_grad()
-        # Forward pass through the VAE
-        recon_x, mu, logvar = vae(x)
-        # Compute the loss
-        loss = vae_loss(recon_x, x, mu, logvar)
-        # Backward pass and optimization
+        reconstructed, mu, logvar = vae(real_coords)
+
+        loss = vae_loss(reconstructed, real_coords, mu, logvar)
+        epoch_loss += loss.item()
+
         loss.backward()
         optimizer.step()
-        total_loss += loss.item()
 
-    # Display training progress every 100 epochs
-    if (epoch + 1) % 100 == 0:
-        print(f"Epoch {epoch + 1}/{epochs}, Loss: {total_loss / len(dataset):.4f}")
+    avg_loss = epoch_loss / len(dataloader)
+    losses.append(avg_loss)
+    print(f"[Epoch {epoch + 1}/{opt.n_epochs}] [Loss: {avg_loss:.6f}]")
 
-    # Save the model every 5000 epochs
-    if (epoch + 1) % save_interval == 0:
-        model_path = f"vae/results/vae_model_{epoch + 1}.pth"
-        torch.save(vae.state_dict(), model_path)
-        print(f"Model saved to {model_path}")
+    if (epoch + 1) % 1000 == 0:
+        torch.save(vae.state_dict(), f"vae/results/vae_params_{epoch + 1}.pth")
 
-# Save the final model
-final_model_path = "vae/results/vae_model_final.pth"
-torch.save(vae.state_dict(), final_model_path)
-print(f"Final model saved to {final_model_path}")
+torch.save(vae.state_dict(), f"vae/results/vae_params_{opt.n_epochs}.pth")
+np.savez("vae/results/losses.npz", np.array(losses))
+
+end = time.time()
+print(f"Training Time: {(end - start) / 60:.2f} minutes")
+
+plt.plot(range(len(losses)), losses, label="Loss")
+plt.xlabel("Epochs")
+plt.ylabel("Loss")
+plt.title("Training Loss Curve")
+plt.legend()
+plt.savefig("vae/results/training_loss_curve.png")
+plt.show()
